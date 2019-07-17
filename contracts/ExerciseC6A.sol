@@ -1,4 +1,4 @@
-pragma solidity ^0.4.25;
+pragma solidity ^0.5.8;
 
 contract ExerciseC6A {
 
@@ -7,15 +7,17 @@ contract ExerciseC6A {
     /********************************************************************************************/
 
 
+    uint constant M = 4;
     struct UserProfile {
         bool isRegistered;
         bool isAdmin;
     }
 
+    bool private operational = true;
     address private contractOwner;                  // Account used to deploy contract
     mapping(address => UserProfile) userProfiles;   // Mapping for storing user profiles
-
-
+    mapping(address => bool) multiCalls;   // Mapping for storing multi-call addresses
+    address[] multiCallKeys = new address[](0);
 
     /********************************************************************************************/
     /*                                       EVENT DEFINITIONS                                  */
@@ -51,6 +53,18 @@ contract ExerciseC6A {
         _;
     }
 
+    modifier requireIsOperational()
+    {
+        require(operational, "Contract is not operational");
+        _;
+    }
+
+    modifier requireIsAdmin()
+    {
+        require(userProfiles[msg.sender].isAdmin, "Caller is not an Admin");
+        _;
+    }
+
     /********************************************************************************************/
     /*                                       UTILITY FUNCTIONS                                  */
     /********************************************************************************************/
@@ -72,6 +86,25 @@ contract ExerciseC6A {
         return userProfiles[account].isRegistered;
     }
 
+    function isOperational() external view returns(bool) {
+        return operational;
+    }
+
+    function setOperatingStatus(bool status) external requireIsAdmin {
+        require(status != operational, "New status must be different from current status");
+        bool isDuplicate = multiCalls[msg.sender];
+        require(!isDuplicate, "Caller has already called this function");
+        multiCalls[msg.sender] = true;
+        multiCallKeys.push(msg.sender);
+        if(multiCallKeys.length >= M) {
+            operational = status;
+            for(uint i = 0; i < multiCallKeys.length; ++i) {
+                multiCalls[multiCallKeys[i]] = false;
+            }
+            multiCallKeys = new address[](0);
+        }
+    }
+
     /********************************************************************************************/
     /*                                     SMART CONTRACT FUNCTIONS                             */
     /********************************************************************************************/
@@ -82,6 +115,7 @@ contract ExerciseC6A {
                                     bool isAdmin
                                 )
                                 external
+                                requireIsOperational
                                 requireContractOwner
     {
         require(!userProfiles[account].isRegistered, "User is already registered.");
