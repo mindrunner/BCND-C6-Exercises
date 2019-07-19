@@ -26,7 +26,7 @@ var Config = async function(accounts) {
         testAddresses: testAddresses,
         exerciseC6D: exerciseC6D
     }
-}
+};
 
 module.exports = {
     Config: Config

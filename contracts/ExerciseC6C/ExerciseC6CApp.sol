@@ -1,4 +1,4 @@
-pragma solidity ^0.4.25;
+pragma solidity ^0.5.10;
 
 // It's important to avoid vulnerabilities due to numeric overflow bugs
 // OpenZeppelin's SafeMath library, when used correctly, protects agains such bugs
@@ -52,7 +52,7 @@ contract ExerciseC6CApp {
 
     function addSale
                                 (
-                                    string id,
+                                    string calldata id,
                                     uint256 amount
                                 )
                                 external
@@ -68,5 +68,5 @@ contract ExerciseC6CApp {
 }
 
 contract ExerciseC6C {
-    function updateEmployee(string id, uint256 sales, uint256 bonus) external;
+    function updateEmployee(string calldata id, uint256 sales, uint256 bonus) external;
 }
